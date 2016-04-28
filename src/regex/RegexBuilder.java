@@ -77,6 +77,22 @@ public class RegexBuilder {
         return new RegExp(this.toString());
     }
 
+    public String[] getExpressions(String identifier){
+        List<String> regexes = this.regexes.get(identifier);
+        if(regexes == null) return null;
+        return regexes.toArray(new String[regexes.size()]);
+    }
+
+    public RegExp[] getExpressionsAsRegExp(String identifier){
+        String[] regexes = this.getExpressions(identifier);
+        if(regexes == null) return null;
+        RegExp[] exps = new RegExp[regexes.length];
+        for(int i = 0 ; i < regexes.length; ++i)
+            exps[i] = new RegExp(regexes[i]);
+
+        return exps;
+    }
+
     public synchronized String toString(){
 
         if(this.changedSinceBuild) {
