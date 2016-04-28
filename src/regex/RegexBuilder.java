@@ -2,7 +2,11 @@ package regex;
 
 import dk.brics.automaton.RegExp;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -21,6 +25,7 @@ public class RegexBuilder {
      * Split for definitions
      */
     public static final String DEFINITION_SPLIT = "\\s*\\:\\:\\=\\s*";
+    public static final String DEFINITION_COMMENT = "#";
 
     private final HashMap<String, List<String>> regexes = new HashMap<>();
     private final LinkedList<String> defOrder = new LinkedList<>();
@@ -30,6 +35,25 @@ public class RegexBuilder {
     private final HashMap<String, String> unfoldedRegexes = new HashMap<>();
 
     public RegexBuilder(){
+
+    }
+
+    public RegexBuilder(File file){
+        this();
+
+        String[] split;
+        String line;
+
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))){
+            while((line = reader.readLine()) != null){
+                if(line.length() > 0 && !line.startsWith(DEFINITION_COMMENT)) {
+                    split = line.split(RegexBuilder.DEFINITION_SPLIT);
+                    this.add(split[0], split[1]);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -168,15 +192,6 @@ public class RegexBuilder {
     static {
         //sanitationRules.put("\\", "\\\\");
         //sanitationRules.put("\"", "\\\"");
-    }
-
-    public static RegExp fromFile(File file){
-
-
-
-
-        return null;
-
     }
 
     private class InvalidReferenceException extends RuntimeException {
