@@ -93,6 +93,16 @@ public class RegexBuilder {
         return exps;
     }
 
+    public String getUnfoldedExpression(String identifier){
+        return this.unfoldedRegexes.get(identifier);
+    }
+
+    public RegExp getUnfoldedExpressionAsRegExp(String identifier){
+        String regex = this.getUnfoldedExpression(identifier);
+        if(regexes == null) return null;
+        else return new RegExp(regex);
+    }
+
     public synchronized String toString(){
 
         if(this.changedSinceBuild) {
