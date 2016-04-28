@@ -6,7 +6,7 @@ NAT ::=             [0]|[1-9][0-9]*
 # e.g. "SignedInt" will be parsed as [\+\-]?[0]|([1-9][0-9]*)
 UnsignedInt ::=     [0]|([1-9][0-9]*)
 SignedInt ::=       [\+\-]?UnsignedInt
-UnsignedReal ::=    UnsignedInt\.[0-9]+([eE] SignedInt)?
+UnsignedReal ::=    UnsignedInt\.[0-9]+([eE]SignedInt)?
 UnsignedReal ::=    UnsignedInt[eE]SignedInt
 
 # Float is a signed real number so prepend it with [\+\-]
