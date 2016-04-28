@@ -173,7 +173,9 @@ public class RegexBuilder {
             builder.append('|').append(guard(sanitize(iterator.next())));
 
         // Add brackets if required
-        return guard(builder.toString());
+        String string = builder.toString();
+        if(regexes.size() > 1 ) string = guard(string);
+        return string;
 
     }
 
