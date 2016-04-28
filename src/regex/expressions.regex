@@ -1,0 +1,19 @@
+ID ::=              [a-z][a-z0-9]*
+NAT ::=             [0]|[1-9][0-9]*
+
+# UnsignedInt, SignedInt and UnsignedReal are directly adapted from the lecture slides
+# Our parser is implemented such that if an identifier of another regex is encountered, it will be replaced by the corresponding regex.
+# e.g. "SignedInt" will be parsed as [\+\-]?[0]|([1-9][0-9]*)
+UnsignedInt ::=     [0]|([1-9][0-9]*)
+SignedInt ::=       [\+\-]?UnsignedInt
+UnsignedReal ::=    UnsignedInt\.[0-9]+([eE] SignedInt)?
+UnsignedReal ::=    UnsignedInt[eE]SignedInt
+
+# Float is a signed real number so prepend it with [\+\-]
+FLOAT ::=           [\+\-]?UnsignedReal
+
+# Java comment is either a block of arbitrary characters preceded by "/*" and succeeded by "*/" or a single line starting with "//"
+CommentJava ::=     (\/\*)(.|\n)*?(\*\/)|(\/\/).*
+
+# Matlab comment is either a block of arbitrary characters preceded by "%{" and succeeded by "%}" or a single line starting with "%"
+CommentMatlab ::=   (\%\{)(.|\n)*?(\%\})|\%.*
