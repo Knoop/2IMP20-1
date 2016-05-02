@@ -6,6 +6,7 @@ package regex;
 
 import dk.brics.automaton.RegExp;
 import dk.brics.automaton.RunAutomaton;
+import gui.RegexBuilderForm;
 
 public class RegexTest {
     
@@ -40,7 +41,9 @@ public class RegexTest {
     }
     
     public static void main(String[] args) {
-        RegexTest exampleRegexTest = new RegexTest("aap");
+        RegexBuilderForm form = new RegexBuilderForm();
+
+        RegexTest exampleRegexTest = new RegexTest("[a-z][a-z0-9]*");
         exampleRegexTest.runTest("aap_df34_d asdf sdfd", 0);
         exampleRegexTest.runTest("a_a_pasdf sdfd", 0);
     }

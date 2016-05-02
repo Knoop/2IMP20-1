@@ -1,5 +1,6 @@
 package regex;
 
+import com.sun.javafx.binding.StringFormatter;
 import dk.brics.automaton.RegExp;
 
 import java.io.File;
@@ -28,6 +29,10 @@ public class RegexBuilder {
     private String string = null;
     private boolean changedSinceBuild;
     private final HashMap<String, String> unfoldedRegexes = new HashMap<>();
+
+    public HashMap<String, List<String>> getRegexes() {
+        return regexes;
+    }
 
     public RegexBuilder(){
 
@@ -158,6 +163,12 @@ public class RegexBuilder {
         return converted;
     }
 
+    public String getRegexListAsString(String identifier) {
+        List<String> regexList = this.regexes.get(identifier);
+
+        return String.join("|", regexList);
+    }
+
 
     private static final HashMap<String, String> sanitationRules = new HashMap<>();
 
@@ -171,9 +182,6 @@ public class RegexBuilder {
     }
 
     public static RegExp fromFile(File file){
-
-
-
 
         return null;
 
