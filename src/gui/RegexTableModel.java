@@ -67,7 +67,7 @@ public class RegexTableModel implements TableModel
             return identifier;
         }
         else if (columnIndex ==1) {
-            return this.regexBuilder.getRegexListAsString(identifier);
+            return this.regexBuilder.combineByIdentifier(identifier);
         }
         return "";
     }

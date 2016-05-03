@@ -163,10 +163,13 @@ public class RegexBuilder {
         return converted;
     }
 
-    public String getRegexListAsString(String identifier) {
+    /**
+     * Combines the list of regexes corresponding to a given identifier
+     * @param identifier
+     */
+    public String combineByIdentifier(String identifier) {
         List<String> regexList = this.regexes.get(identifier);
-
-        return String.join("|", regexList);
+        return combine(regexList);
     }
 
 
