@@ -3,7 +3,11 @@ package regex;
 import com.sun.javafx.binding.StringFormatter;
 import dk.brics.automaton.RegExp;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -22,6 +26,7 @@ public class RegexBuilder {
      * Split for definitions
      */
     public static final String DEFINITION_SPLIT = "\\s*\\:\\:\\=\\s*";
+    public static final String DEFINITION_COMMENT = "#";
 
     private final HashMap<String, List<String>> regexes = new HashMap<>();
     private final LinkedList<String> defOrder = new LinkedList<>();
@@ -30,11 +35,26 @@ public class RegexBuilder {
     private boolean changedSinceBuild;
     private final HashMap<String, String> unfoldedRegexes = new HashMap<>();
 
-    public HashMap<String, List<String>> getRegexes() {
-        return regexes;
+    public RegexBuilder(){
+
     }
 
-    public RegexBuilder(){
+    public RegexBuilder(File file){
+        this();
+
+        String[] split;
+        String line;
+
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))){
+            while((line = reader.readLine()) != null){
+                if(line.length() > 0 && !line.startsWith(DEFINITION_COMMENT)) {
+                    split = line.split(RegexBuilder.DEFINITION_SPLIT);
+                    this.add(split[0], split[1]);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -54,8 +74,53 @@ public class RegexBuilder {
         return this;
     }
 
+    public HashMap<String, List<String>> getRegexes() {
+        return regexes;
+    }
+
+    public void setRegexForIdentifier(String identifier, List<String> regexes) {
+        this.regexes.put(identifier,  regexes);
+        this.unfold();
+    }
+
+    public void updateIdentifier(String oldIdentifier, String newIdentifier) {
+        List<String> value = this.regexes.get(oldIdentifier);
+        this.regexes.remove(oldIdentifier);
+        this.regexes.put(newIdentifier, value);
+        this.unfold();
+    }
+
     public RegExp build(){
         return new RegExp(this.toString());
+    }
+
+    public String[] getExpressions(String identifier){
+        List<String> regexes = this.regexes.get(identifier);
+        if(regexes == null) return null;
+        return regexes.toArray(new String[regexes.size()]);
+    }
+
+    public RegExp[] getExpressionsAsRegExp(String identifier){
+        String[] regexes = this.getExpressions(identifier);
+        if(regexes == null) return null;
+        RegExp[] exps = new RegExp[regexes.length];
+        for(int i = 0 ; i < regexes.length; ++i)
+            exps[i] = new RegExp(regexes[i]);
+
+        return exps;
+    }
+
+    public String getUnfoldedExpression(String identifier){
+        if (unfoldedRegexes.isEmpty()) {
+            this.unfold();
+        }
+        return this.unfoldedRegexes.get(identifier);
+    }
+
+    public RegExp getUnfoldedExpressionAsRegExp(String identifier){
+        String regex = this.getUnfoldedExpression(identifier);
+        if(regexes == null) return null;
+        else return new RegExp(regex);
     }
 
     public synchronized String toString(){
@@ -138,7 +203,9 @@ public class RegexBuilder {
             builder.append('|').append(guard(sanitize(iterator.next())));
 
         // Add brackets if required
-        return guard(builder.toString());
+        String string = builder.toString();
+        if(regexes.size() > 1 ) string = guard(string);
+        return string;
 
     }
 
@@ -163,15 +230,6 @@ public class RegexBuilder {
         return converted;
     }
 
-    /**
-     * Combines the list of regexes corresponding to a given identifier
-     * @param identifier
-     */
-    public String combineByIdentifier(String identifier) {
-        List<String> regexList = this.regexes.get(identifier);
-        return combine(regexList);
-    }
-
 
     private static final HashMap<String, String> sanitationRules = new HashMap<>();
 
@@ -182,12 +240,6 @@ public class RegexBuilder {
     static {
         //sanitationRules.put("\\", "\\\\");
         //sanitationRules.put("\"", "\\\"");
-    }
-
-    public static RegExp fromFile(File file){
-
-        return null;
-
     }
 
     private class InvalidReferenceException extends RuntimeException {

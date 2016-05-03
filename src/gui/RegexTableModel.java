@@ -67,7 +67,7 @@ public class RegexTableModel implements TableModel
             return identifier;
         }
         else if (columnIndex ==1) {
-            return this.regexBuilder.combineByIdentifier(identifier);
+            return this.regexBuilder.getUnfoldedExpression(identifier);
         }
         return "";
     }
@@ -79,10 +79,8 @@ public class RegexTableModel implements TableModel
             if (!(aValue instanceof String)) {
                 throw new IllegalArgumentException("Identifier must be a string");
             }
-            List<String> value = this.regexBuilder.getRegexes().get(identifier);
             String newIdentifier = (String)aValue;
-            this.regexBuilder.getRegexes().remove(identifier);
-            this.regexBuilder.getRegexes().put(newIdentifier, value);
+            this.regexBuilder.updateIdentifier(identifier, newIdentifier);
         }
         else if (columnIndex == 1) {
             if (!(aValue instanceof Collection<?>)) {
@@ -96,7 +94,7 @@ public class RegexTableModel implements TableModel
                 }
                 newValue.add((String) aValue);
             }
-            this.regexBuilder.getRegexes().put(identifier,  newValue);
+            this.regexBuilder.setRegexForIdentifier(identifier,  newValue);
         }
 
         this.listeners.forEach(TableModelListener::notify);

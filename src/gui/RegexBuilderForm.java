@@ -5,6 +5,8 @@ import regex.RegexBuilder;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -27,8 +29,10 @@ public class RegexBuilderForm {
 
     private JFrame container;
 
-    public RegexBuilderForm() {
-        this.regexBuilder = new RegexBuilder();
+    private String selectedRegex;
+
+    public RegexBuilderForm(RegexBuilder regexBuilder) {
+        this.regexBuilder = regexBuilder;
         this.tableModel = new RegexTableModel(this.regexBuilder);
         this.tblRegex.setModel(this.tableModel);
 
@@ -37,6 +41,7 @@ public class RegexBuilderForm {
         this.container.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.container.pack();
         this.container.setSize(500, 500);
+        this.selectedRegex = "";
         this.initEvents();
         this.container.setVisible(true);
     }
@@ -45,28 +50,35 @@ public class RegexBuilderForm {
         this.txtTestInput.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                txtTestInput_update(e);
+                txtTestInput_update();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                txtTestInput_update(e);
+                txtTestInput_update();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                txtTestInput_update(e);
+                txtTestInput_update();
+            }
+        });
+
+        this.tblRegex.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                selectedRegex = (String)tblRegex.getValueAt(tblRegex.getSelectedRow(), 1);
+                txtTestInput_update();
             }
         });
     }
 
-    private void txtTestInput_update(DocumentEvent e) {
-        String testRegex = "(\\/\\*)(.|\\n)*?(\\*\\/)|(\\/\\/).*";
-        Pattern pattern = Pattern.compile(testRegex);
+    private void txtTestInput_update() {
+        Pattern pattern = Pattern.compile(this.selectedRegex);
         String text = this.txtTestInput.getText();
         Matcher matcher = pattern.matcher(text);
+        txtMatches.setText("");
         if (matcher.find()) {
-            txtMatches.setText("");
             txtMatches.append(matcher.group());
             txtMatches.append("\n\n");
         }

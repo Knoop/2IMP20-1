@@ -8,6 +8,8 @@ import dk.brics.automaton.RegExp;
 import dk.brics.automaton.RunAutomaton;
 import gui.RegexBuilderForm;
 
+import java.io.File;
+
 public class RegexTest {
     
     private final RunAutomaton r;
@@ -41,7 +43,8 @@ public class RegexTest {
     }
     
     public static void main(String[] args) {
-        RegexBuilderForm form = new RegexBuilderForm();
+        RegexBuilder regexBuilder = new RegexBuilder(new File("expressions.regex"));
+        RegexBuilderForm form = new RegexBuilderForm(regexBuilder);
 
         RegexTest exampleRegexTest = new RegexTest("[a-z][a-z0-9]*");
         exampleRegexTest.runTest("aap_df34_d asdf sdfd", 0);
