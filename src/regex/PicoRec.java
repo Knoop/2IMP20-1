@@ -38,6 +38,90 @@ public class PicoRec {
     }
 
     /**
+     * Recognize a program, following this definition:
+     * {@code PROGRAM ::= "begin" DECLS "|" (STATEMENT ";")* "end"}
+     *
+     * @throws ParseException When the input couldn't be parsed.
+     */
+    private void recognizeProgram() throws ParseException {
+
+    }
+
+    /**
+     * Recognize a declaration, following this definition:
+     * {@code DECLARATION ::= "declare" (ID ",")*}
+     *
+     * @throws ParseException When the input couldn't be parsed.
+     */
+    private void recognizeDeclaration() throws ParseException {
+
+    }
+
+    /**
+     * Recognize a statement, following this definition:
+     * {@code STATEMENT ::= ID ":=" EXP}
+     *
+     * @throws ParseException When the input couldn't be parsed.
+     */
+    private void recognizeStatement() throws ParseException {
+
+    }
+
+    /**
+     * Recognize an identifier, following this definition:
+     * {@code ID ::= [a-z][a-z0-9]*}
+     *
+     * @throws ParseException When the input couldn't be parsed.
+     */
+    private void recognizeIdentifier() throws ParseException {
+
+    }
+
+    /**
+     * Recognize a natural number, following this definition:
+     * {@code NAT ::= [0]|[1-9][0-9]*}
+     *
+     * @throws ParseException When the input couldn't be parsed.
+     */
+    private void recognizeNaturalNumber() throws ParseException {
+
+    }
+
+    /**
+     * Recognize an expression, following these definitions:
+     * {@code EXP ::= ID}
+     * {@code EXP ::= NAT}
+     * {@code EXP ::= "-" EXP}
+     * {@code EXP ::= MULT_EXP}
+     * {@code EXP ::= ADD_EXP}
+     * {@code EXP ::= "(" EXP ")"}
+     * @throws ParseException When the input couldn't be parsed.
+     */
+    private void recognizeExpression() throws ParseException {
+
+    }
+
+    /**
+     * Recognize a multiplication expression, following this definition:
+     * {@code MULT_EXP ::= EXP "*" EXP}
+     *
+     * @throws ParseException When the input couldn't be parsed.
+     */
+    private void recognizeMultiplicationExpression() throws ParseException {
+
+    }
+
+    /**
+     * Recognize an addition expression, following this definition:
+     * {@code ADD_EXP ::= EXP "+" EXP}
+     *
+     * @throws ParseException When the input couldn't be parsed.
+     */
+    private void recognizeAdditionExpression() throws ParseException {
+
+    }
+
+    /**
      * Recognize the earlier defined InputStream as a valid Pico program.
      *
      * @return {@code true} if the defined InputStream is a valid Pico program, {@code false} otherwise.
