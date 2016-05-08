@@ -166,7 +166,12 @@ public class PicoRec {
         }
     }
 
-        return c;
+    private char peek() throws ParseException {
+        try {
+            return this.input.peek();
+        } catch (IOException e) {
+            throw new ParseException(e);
+        }
     }
 
 
