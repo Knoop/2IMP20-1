@@ -143,19 +143,21 @@ public class PicoRec {
      */
     private char next() throws IOException {
 
-        char c = (char) this.input.read();
+        char c;
+        do {
+            c = (char) this.input.read();
 
-        // Update counters: increase general count
-        ++this.charCounter;
-        if(c == '\n'){
-            ++this.lineCounter;
-            this.columnCounter = 1;
-            c = next();
-        }
-        else if(c == '\r' && this.columnCounter == 1){
-            c = next();
-        }
-        else ++this.columnCounter;
+            // Update counters: increase general count
+            ++this.charCounter;
+            ++this.columnCounter;
+
+            // If it is newline,
+            if (c == '\n') {
+                ++this.lineCounter;
+                this.columnCounter = 1;
+            }
+
+        } while(c ==' ' || c == '\n');
 
         return c;
     }
