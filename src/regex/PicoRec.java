@@ -11,12 +11,12 @@ import java.io.StringReader;
  */
 public class PicoRec {
 
+    private LookaheadReader input;
 
     /**
      * Counters that show where we are going wrong
      */
     private int lineCounter = 1, charCounter = 0, columnCounter = 1;
-    private Reader input;
 
 
     /**
@@ -25,7 +25,7 @@ public class PicoRec {
      * @param stream
      */
     public PicoRec(InputStream stream) {
-        this.input = new InputStreamReader(stream);
+        this.input = new LookaheadReader(stream);
     }
 
     /**
@@ -34,7 +34,7 @@ public class PicoRec {
      * @param string
      */
     public PicoRec(String string) {
-        this.input = new StringReader(string);
+        this.input = new LookaheadReader(new StringReader(string));
     }
 
     /**
@@ -203,6 +203,48 @@ public class PicoRec {
 
     }
 
+    private static class LookaheadReader {
+
+        private Reader reader;
+        private Character peek = null;
+
+        private LookaheadReader(InputStream stream){
+            this(new InputStreamReader(stream));
+        }
+        private LookaheadReader(Reader reader) {
+            this.reader = reader;
+        }
+
+        /**
+         * Look ahead one symbol from the current position for {@code read}. In other words, {@code peek} indicates the
+         * value that would come from calling {@code read}.
+         * As soon as the {@code peek} value has been
+         * set it won't change until a new character is read. This means that calling peek has no influence on what
+         * read
+         * will return, no matter how often you call it.
+         *
+         * @return The character that comes after the position of {@code read}.
+         * @throws IOException If the next value couldn't be obtained from the input.
+         */
+        private char peek() throws IOException {
+            // If the peek already exists, return that, otherwise read the next character and store it as the peek
+            return this.peek = (this.peek != null) ? this.peek : this.read();
+        }
+
+        /**
+         * Increase the current position for {@code read} by reading the next symbol. This resets the value of {@code
+         * peek}. If {@code peek} wa
+         *
+         * @return The next character from the input
+         * @throws IOException If the next value couldn't be obtained from the input.
+         */
+        private char read() throws IOException {
+            char character = (this.peek != null) ? this.peek : (char) this.reader.read();
+            this.peek = null;
+            return character;
+        }
+
+    }
 
     public class MisMatchException extends RuntimeException {
 
