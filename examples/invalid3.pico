@@ -1,0 +1,1 @@
+begindeclarea,b,|a1:=2;b2:=4;a:=(a+1)-b;b:=-a;end;
