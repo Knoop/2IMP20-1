@@ -9,6 +9,7 @@ import dk.brics.automaton.RunAutomaton;
 import gui.RegexBuilderForm;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,6 +66,14 @@ public class RegexTest {
         printTest(regexBuilder, "CommentJava", TestStrings.javaCommentTestsMatch, TestStrings.javaCommentTestsNoMatch);
         System.out.println("Matlab comment: ");
         printTest(regexBuilder, "CommentMatlab", TestStrings.matlabCommentTestsMatch, TestStrings.matlabCommentTestsNoMatch);
+
+        System.out.println("Exercise 4 tests:");
+        System.out.println("Expecting the following files to be recognized");
+        for(int i = 1 ; i <= 4; ++i)
+            testPicoRecognition(new File("examples/valid"+i+".pico"));
+        System.out.println("Expecting the following files not be recognized due to ParseExceptions");
+        for(int i = 1 ; i <= 3; ++i)
+            testPicoRecognition(new File("examples/invalid"+i+".pico"));
     }
 
     /**
@@ -124,5 +133,18 @@ public class RegexTest {
         else {
             System.out.println(String.format("%s does not match %s", input, regex));
         }
+    }
+
+    private static void testPicoRecognition(File file){
+        try{
+            System.out.println("Trying to recognize "+file.getAbsolutePath());
+            new PicoRec(new FileInputStream(file)).recognize();
+            System.out.println("Recognized");
+        } catch (PicoRec.ParseException e) {
+            System.out.println("Wasn't recognized. Cause: "+e.getMessage());
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        System.out.println();
     }
 }
