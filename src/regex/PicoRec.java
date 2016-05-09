@@ -1,17 +1,15 @@
 package regex;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringReader;
+import regex.PicoTokenizer.Token;
 
+import java.io.InputStream;
+import java.io.StringReader;
 /**
  * Created by Maurice on 6-5-2016.
  */
 public class PicoRec {
 
-    private LookaheadReader input;
+    private PicoTokenizer tokenizer;
 
 
 
@@ -21,7 +19,7 @@ public class PicoRec {
      * @param stream
      */
     public PicoRec(InputStream stream) {
-        this.input = new LookaheadReader(stream);
+        this.tokenizer = new PicoTokenizer(stream);
     }
 
     /**
@@ -30,7 +28,7 @@ public class PicoRec {
      * @param string
      */
     public PicoRec(String string) {
-        this.input = new LookaheadReader(new StringReader(string));
+        this.tokenizer = new PicoTokenizer(new StringReader(string));
     }
 
     /**
@@ -41,11 +39,11 @@ public class PicoRec {
      */
     private void recognizeProgram() throws ParseException {
 
-        match("begin");
-        recognizeDeclaration();
-        match("|");
-        recognizeStatement();
-        match("end");
+        this.match(Token.Type.BEGIN);
+        this.recognizeDeclarations();
+        this.match(Token.Type.DECLARATIONS_END);
+        this.recognizeStatements();
+        this.match(Token.Type.END);
 
     }
 
@@ -55,71 +53,41 @@ public class PicoRec {
      *
      * @throws ParseException When the input couldn't be parsed.
      */
-    private void recognizeDeclaration() throws ParseException {
-        match("declare");
+    private void recognizeDeclarations() throws ParseException {
+        this.match(Token.Type.DECLARE);
 
-        // Match all declarations, 0 or more.
-        while (this.peek() != '|') {
-            recognizeIdentifier();
-            match(',');
-        }
+        while(this.tokenizer.peek().type != Token.Type.DECLARATIONS_END)
+            this.recognizeDeclaration();
+    }
+
+    /**
+     * Recognize a single declaration, following this definition:
+     * {@code ID ","}.
+     * @throws ParseException When the input couldn't be parsed.
+     */
+    private void recognizeDeclaration() throws ParseException {
+        this.match(Token.Type.IDENTIFIER);
+        this.match(Token.Type.DECLARATION_END);
+    }
+
+    private void recognizeStatement() throws ParseException {
+        this.match(Token.Type.IDENTIFIER);
+        this.match(Token.Type.ASSIGN);
+        this.recognizeExpression();
+        this.match(Token.Type.STATEMENT_END);
     }
 
     /**
      * Recognize a statement, following this definition:
-     * {@code STATEMENT ::= ID ":=" EXP}
+     * {@code STATEMENT ::= ID ":=" EXP ";"}
      *
      * @throws ParseException When the input couldn't be parsed.
      */
-    private void recognizeStatement() throws ParseException {
-
-        while (this.peek() != 'e') {
-            recognizeIdentifier();
-            match(":=");
-            recognizeExpression();
-            match(";");
-        }
-
+    private void recognizeStatements() throws ParseException {
+        while(this.tokenizer.peek().type != Token.Type.END)
+            this.recognizeStatement();
     }
 
-    /**
-     * Recognize an identifier, following this definition:
-     * {@code ID ::= [a-z][a-z0-9]*}
-     *
-     * @throws ParseException When the input couldn't be parsed.
-     */
-    private void recognizeIdentifier() throws ParseException {
-
-        this.match('a', 'z');
-
-        boolean recognizingIdentifier = true;
-        do {
-            if (PicoRec.withinInterval(this.peek(), '0', '9'))
-                this.match('0', '9');
-            else if (PicoRec.withinInterval(this.peek(), 'a', 'z'))
-                this.match('a', 'z');
-            else
-                recognizingIdentifier = false;
-        } while(recognizingIdentifier);
-    }
-
-    /**
-     * Recognize a natural number, following this definition:
-     * {@code NAT ::= [0]|[1-9][0-9]*}
-     *
-     * @throws ParseException When the input couldn't be parsed.
-     */
-    private void recognizeNaturalNumber() throws ParseException {
-
-        if(this.peek() == '0')
-            this.match("0");
-        else{
-            this.match('1','9');
-            while(PicoRec.withinInterval(this.peek(),'0','9'))
-                this.match('0','9');
-        }
-
-    }
 
     /**
      * Recognize an expression, following these definitions:
@@ -134,28 +102,35 @@ public class PicoRec {
      */
     private void recognizeExpression() throws ParseException {
 
-        // Recognize any expression that is not part of a dual expression
-        if(PicoRec.withinInterval(peek(), '0','9'))
-            recognizeNaturalNumber();
-        else if(peek() == '-') {
-            match('-');
-            recognizeExpression();
-        }
-        else if(peek() == '(') {
-            match('(');
-            recognizeExpression();
-            match(')');
-        } else {
-            recognizeIdentifier();
+        // Obtain the next token and see what type of expression the left hand is
+        Token t = this.tokenizer.next();
+        switch(t.type){
+
+            case OPEN:
+                this.recognizeExpression();
+                this.match(Token.Type.CLOSE);
+                break;
+            case MINUS:
+                this.recognizeExpression();
+                break;
+            case IDENTIFIER:
+                break;
+            case NATNUMBER:
+                break;
+            default:
+                throw new MisMatchException(Token.Type.OPEN, t.type);
         }
 
-        // Now recognize whether an additional expression is present, regardless of what we've seen so fat.
-        if(peek() == '*') {
-            match("*");
-            recognizeExpression();
-        } else if(peek() == '+') {
-            match("+");
-            recognizeExpression();
+        // See if there is a right hand as well (which is + or * followed by another expression)
+        switch(this.tokenizer.peek().type){
+            case ADD:
+                this.match(Token.Type.ADD);
+                this.recognizeExpression();
+                break;
+            case MULTIPLY:
+                this.match(Token.Type.MULTIPLY);
+                this.recognizeExpression();
+                break;
         }
 
     }
@@ -175,27 +150,6 @@ public class PicoRec {
         }
     }
 
-    /**
-     * Obtain the next character from the InputStream. Newline characters and spaces are ignored.
-     *
-     * @return
-     */
-    private char next() throws ParseException {
-        try {
-            return this.input.read();
-        } catch (IOException e) {
-            throw new ParseException(e);
-        }
-    }
-
-    private char peek() throws ParseException {
-        try {
-            return this.input.peek();
-        } catch (IOException e) {
-            throw new ParseException(e);
-        }
-    }
-
 
     /**
      * Checks whether the next character is any of the given characters
@@ -203,48 +157,14 @@ public class PicoRec {
      * @param expected A set of characters that are expected.
      * characters, {@code false} otherwise.
      */
-    private void match(char expected) throws ParseException {
+    private void match(Token.Type expected) throws ParseException {
         try {
-            char actual = this.next();
-            if(expected != actual)
-                throw new MisMatchException(expected, actual);
+            Token actual = this.tokenizer.next();
+            if(actual.type != expected)
+                throw new MisMatchException(expected, actual.type);
         } catch (Exception e) {
             throw new ParseException(e);
         }
-    }
-
-
-    /**
-     * Match the next characters to the given expected string. This is equal to continuously calling {@code
-     * match(char)}
-     * for every character in the expected {@code String} until the end of the {@code String} is reached, or a mismatch
-     * occurred.
-     *
-     * @param expected
-     * @return true if the next characters were equal to the given string, false otherwise.
-     */
-    private void match(String expected) throws ParseException{
-        for (int i = 0; i < expected.length(); ++i)
-            match(expected.charAt(i));
-    }
-
-    /**
-     * Matches the next character to be between the indicated inclusive bounds
-     * @param lower The lowest acceptable character (inclusive).
-     * @param upper The highest acceptable character (inclusive).
-     */
-    private void match(char lower, char upper){
-        try {
-            char actual = this.next();
-            if (!PicoRec.withinInterval(actual, lower, upper))
-                throw new MisMatchException(lower, upper, actual);
-        } catch (Exception e) {
-            throw new ParseException(e);
-        }
-    }
-
-    public static boolean withinInterval(char value, char lower, char upper){
-        return lower <= value && value <= upper;
     }
 
     public static class ParseException extends RuntimeException {
@@ -255,87 +175,13 @@ public class PicoRec {
 
     }
 
-    private static class LookaheadReader {
 
-        /**
-         * Counters that show where we are going wrong
-         */
-        private int lineCounter = 1, charCounter = 0, columnCounter = 1;
-
-        private Reader reader;
-        private Character peek = null;
-
-        private LookaheadReader(InputStream stream){
-            this(new InputStreamReader(stream));
-        }
-        private LookaheadReader(Reader reader) {
-            this.reader = reader;
-        }
-
-        /**
-         * Look ahead one symbol from the current position for {@code read}. In other words, {@code peek} indicates the
-         * value that would come from calling {@code read}.
-         * As soon as the {@code peek} value has been
-         * set it won't change until a new character is read. This means that calling peek has no influence on what
-         * read
-         * will return, no matter how often you call it.
-         *
-         * @return The character that comes after the position of {@code read}.
-         * @throws IOException If the next value couldn't be obtained from the input.
-         */
-        private char peek() throws IOException {
-            // If the peek already exists, return that, otherwise read the next character and store it as the peek
-            return this.peek = (this.peek != null) ? this.peek : this.read();
-        }
-
-        /**
-         * Increase the current position for {@code read} by reading the next symbol. This resets the value of {@code
-         * peek}. If {@code peek} wa
-         *
-         * @return The next character from the input
-         * @throws IOException If the next value couldn't be obtained from the input.
-         */
-        private char read() throws IOException {
-            if(this.peek != null){
-                char c = this.peek;
-                this.peek = null;
-                return c;
-            }
-            else {
-                int c;
-                do {
-                    c = this.reader.read();
-
-                    // Update counters: increase general count
-                    ++this.charCounter;
-                    ++this.columnCounter;
-
-                    // If it is newline,
-                    if (c == '\n') {
-                        ++this.lineCounter;
-                        this.columnCounter = 1;
-                    }
-
-                } while (c == ' ' || c == '\n' || c == '\r');
-
-                return (char)c;
-            }
-
-        }
-
-    }
 
     public class MisMatchException extends RuntimeException {
 
-        private MisMatchException(char expected, char received) {
-            super("Expected \'" + sanitize(expected) + "\' but received \'" + sanitize(received) + "\' at " + PicoRec.this.input.lineCounter + ":" + PicoRec.this.input.columnCounter);
+        private MisMatchException(Token.Type expected, Token.Type received) {
+            super("Expected \"" + expected + "\" but received \"" + received + "\" at " + PicoRec.this.tokenizer.lineCounter() + ":" + PicoRec.this.tokenizer.columnCounter());
         }
-
-        private MisMatchException(char lower, char upper, char received) {
-            super("Expected \'[" + sanitize(lower) +'-'+sanitize(upper)+ "]\' but received \'" + sanitize(received) + "\' at " + PicoRec.this.input.lineCounter + ":" + PicoRec.this.input.columnCounter);
-        }
-
-
     }
 
     private static String sanitize(char character){
