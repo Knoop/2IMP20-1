@@ -13,10 +13,6 @@ public class PicoRec {
 
     private LookaheadReader input;
 
-    /**
-     * Counters that show where we are going wrong
-     */
-    private int lineCounter = 1, charCounter = 0, columnCounter = 1;
 
 
     /**
@@ -127,40 +123,23 @@ public class PicoRec {
      * @return {@code true} if the defined InputStream is a valid Pico program, {@code false} otherwise.
      */
     public synchronized boolean recognize() {
-        // Do some setup
-        try{
-            // Try to parse the grammar
+        try {
+            this.recognizeProgram();
             return true;
-        }catch(ParseException e){
+        } catch (ParseException e) {
+            e.getCause().printStackTrace();
             return false;
         }
     }
 
     /**
-     * Handle the next character
+     * Obtain the next character from the InputStream. Newline characters and spaces are ignored.
      *
      * @return
      */
     private char next() throws ParseException {
-
         try {
-            char c;
-            do {
-                c = (char) this.input.read();
-
-                // Update counters: increase general count
-                ++this.charCounter;
-                ++this.columnCounter;
-
-                // If it is newline,
-                if (c == '\n') {
-                    ++this.lineCounter;
-                    this.columnCounter = 1;
-                }
-
-            } while (c == ' ' || c == '\n');
-
-            return c;
+            return this.input.read();
         } catch (IOException e) {
             throw new ParseException(e);
         }
@@ -217,6 +196,11 @@ public class PicoRec {
 
     private static class LookaheadReader {
 
+        /**
+         * Counters that show where we are going wrong
+         */
+        private int lineCounter = 1, charCounter = 0, columnCounter = 1;
+
         private Reader reader;
         private Character peek = null;
 
@@ -251,9 +235,31 @@ public class PicoRec {
          * @throws IOException If the next value couldn't be obtained from the input.
          */
         private char read() throws IOException {
-            char character = (this.peek != null) ? this.peek : (char) this.reader.read();
-            this.peek = null;
-            return character;
+            if(this.peek != null){
+                char c = this.peek;
+                this.peek = null;
+                return c;
+            }
+            else {
+                int c;
+                do {
+                    c = this.reader.read();
+
+                    // Update counters: increase general count
+                    ++this.charCounter;
+                    ++this.columnCounter;
+
+                    // If it is newline,
+                    if (c == '\n') {
+                        ++this.lineCounter;
+                        this.columnCounter = 1;
+                    }
+
+                } while (c == ' ' || c == '\n' || c == '\r');
+
+                return (char)c;
+            }
+
         }
 
     }
