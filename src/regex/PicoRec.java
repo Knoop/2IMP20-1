@@ -3,7 +3,6 @@ package regex;
 import regex.PicoTokenizer.Token;
 
 import java.io.InputStream;
-import java.io.StringReader;
 /**
  * Created by Maurice on 6-5-2016.
  */
@@ -28,7 +27,7 @@ public class PicoRec {
      * @param string
      */
     public PicoRec(String string) {
-        this.tokenizer = new PicoTokenizer(new StringReader(string));
+        this.tokenizer = new PicoTokenizer(string);
     }
 
     /**
@@ -180,16 +179,7 @@ public class PicoRec {
     public class MisMatchException extends RuntimeException {
 
         private MisMatchException(Token.Type expected, Token.Type received) {
-            super("Expected \"" + expected + "\" but received \"" + received + "\" at " + PicoRec.this.tokenizer.lineCounter() + ":" + PicoRec.this.tokenizer.columnCounter());
+            super("Expected \"" + expected + "\" but received \"" + received + "\"");
         }
-    }
-
-    private static String sanitize(char character){
-        if(character < 32)
-            return "[NP: "+((int)character)+"]";
-        else if(character == 127)
-            return "[DEL]";
-        else
-            return character+"";
     }
 }
