@@ -1,16 +1,22 @@
 package regex;
 
+import dk.brics.automaton.AutomatonMatcher;
+import dk.brics.automaton.RegExp;
+import dk.brics.automaton.RunAutomaton;
+
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 
 /**
  * Tokenizer for the Pico language.
  */
 public class PicoTokenizer {
 
-    private final Reader reader;
-    private int columnCounter = 1, lineCounter = 1;
+    /**
+     * Regular expression that matches all tokens of the Pico language
+     */
+    private static final String REGEX = "(begin)|(end)|(declare)|,|\\||;|(:=)|\\(|\\)|\\-|\\+|\\*|([a-z][a-z0-9]*)|([1-9][0-9]*)|0";
+    private final AutomatonMatcher matcher;
     /**
      * The currently read token value. It may depend on the value of the next read token what the type of this token
      * is.
@@ -21,22 +27,41 @@ public class PicoTokenizer {
      * .
      */
     private String next;
-
     /**
      * The Token type of the current
      */
     private Token.Type typeOfCurrent;
 
-    public PicoTokenizer(Reader reader) {
-        this.reader = reader;
-        // Shift twice to obtain a token for the current and next values.
-        this.shiftTokens();
-        this.shiftTokens();
+    public PicoTokenizer(String inspectedString) {
+        // Create a matcher on the given string
+        this.matcher = new RunAutomaton(new RegExp(REGEX).toAutomaton()).newMatcher(inspectedString);
 
+        // Shift twice to obtain a token for both the current value and the next value.
+        this.shiftTokens();
+        this.shiftTokens();
     }
 
     public PicoTokenizer(InputStream inputStream) {
-        this(new InputStreamReader(inputStream));
+        this(readContent(inputStream));
+    }
+
+    /**
+     * Read the contents of a stream into a String.
+     *
+     * @param stream The stream from which to read the content
+     * @return
+     */
+    private static String readContent(InputStream stream) {
+        StringBuilder builder = new StringBuilder();
+
+        try {
+            for (int c = stream.read(); c != -1; c = stream.read())
+                builder.append((char) c);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return builder.toString();
     }
 
     /**
@@ -90,20 +115,12 @@ public class PicoTokenizer {
     }
 
     /**
-     * Reads the next token from the {@code InputStream}.
+     * Read the next token.
      *
-     * @return The next token.
+     * @return The next token or null if there is no such token.
      */
     private String readNextToken() {
-        return null;
-    }
-
-    public int columnCounter() {
-        return this.columnCounter;
-    }
-
-    public int lineCounter() {
-        return this.lineCounter;
+        return this.matcher.find() ? this.matcher.group() : null;
     }
 
     private Token.Type determineTypeOfCurrent() {
