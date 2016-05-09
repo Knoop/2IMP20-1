@@ -73,6 +73,13 @@ public class PicoRec {
      */
     private void recognizeStatement() throws ParseException {
 
+        while (this.peek() != 'e') {
+            recognizeIdentifier();
+            match(":=");
+            recognizeExpression();
+            match(";");
+        }
+
     }
 
     /**
