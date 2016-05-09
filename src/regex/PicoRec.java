@@ -83,6 +83,17 @@ public class PicoRec {
      */
     private void recognizeIdentifier() throws ParseException {
 
+        this.match('a', 'z');
+
+        boolean recognizingIdentifier = true;
+        do {
+            if (PicoRec.withinInterval(this.peek(), '0', '9'))
+                this.match('0', '9');
+            else if (PicoRec.withinInterval(this.peek(), 'a', 'z'))
+                this.match('a', 'z');
+            else
+                recognizingIdentifier = false;
+        } while(recognizingIdentifier);
     }
 
     /**
