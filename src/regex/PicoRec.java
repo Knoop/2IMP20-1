@@ -149,14 +149,8 @@ public class PicoRec {
      *
      * @return {@code true} if the defined InputStream is a valid Pico program, {@code false} otherwise.
      */
-    public synchronized boolean recognize() {
-        try {
-            this.recognizeProgram();
-            return true;
-        } catch (ParseException e) {
-            e.getCause().printStackTrace();
-            return false;
-        }
+    public synchronized void recognize() throws ParseException{
+        this.recognizeProgram();
     }
 
 

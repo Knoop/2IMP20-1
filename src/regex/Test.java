@@ -11,10 +11,8 @@ public class Test {
 
     static void testParse(File file){
         try {
-            if((new PicoRec(new FileInputStream(file))).recognize())
-                System.out.println("Recognized!");
-            else
-                System.out.println("Didn't recognize");
+            new PicoRec(new FileInputStream(file)).recognize();
+            System.out.println("Recognized!");
 
         } catch (Exception e) {
             e.printStackTrace();
