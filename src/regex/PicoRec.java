@@ -284,19 +284,23 @@ public class PicoRec {
 
     public class MisMatchException extends RuntimeException {
 
-        int lineCounter, columnCounter;
-        char expected, received;
-        private MisMatchException(char expected, char received){
-            super("Expected "+expected+" but received "+received+" at "+PicoRec.this.lineCounter+":"+PicoRec.this.columnCounter);
-            this.expected = expected;
-            this.received = received;
-            this.lineCounter = PicoRec.this.lineCounter;
-            this.columnCounter = PicoRec.this.columnCounter;
+        private MisMatchException(char expected, char received) {
+            super("Expected \'" + sanitize(expected) + "\' but received \'" + sanitize(received) + "\' at " + PicoRec.this.input.lineCounter + ":" + PicoRec.this.input.columnCounter);
         }
+
+        private MisMatchException(char lower, char upper, char received) {
+            super("Expected \'[" + sanitize(lower) +'-'+sanitize(upper)+ "]\' but received \'" + sanitize(received) + "\' at " + PicoRec.this.input.lineCounter + ":" + PicoRec.this.input.columnCounter);
+        }
+
+
     }
 
-
-
-
-
+    private static String sanitize(char character){
+        if(character < 32)
+            return "[NP: "+((int)character)+"]";
+        else if(character == 127)
+            return "[DEL]";
+        else
+            return character+"";
+    }
 }
