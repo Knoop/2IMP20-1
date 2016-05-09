@@ -56,7 +56,13 @@ public class PicoRec {
      * @throws ParseException When the input couldn't be parsed.
      */
     private void recognizeDeclaration() throws ParseException {
+        match("declare");
 
+        // Match all declarations, 0 or more.
+        while (this.peek() != '|') {
+            recognizeIdentifier();
+            match(',');
+        }
     }
 
     /**
