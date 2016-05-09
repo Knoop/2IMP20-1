@@ -122,29 +122,34 @@ public class PicoRec {
      * {@code EXP ::= MULT_EXP}
      * {@code EXP ::= ADD_EXP}
      * {@code EXP ::= "(" EXP ")"}
+     *
      * @throws ParseException When the input couldn't be parsed.
      */
     private void recognizeExpression() throws ParseException {
 
-    }
+        // Recognize any expression that is not part of a dual expression
+        if(PicoRec.withinInterval(peek(), '0','9'))
+            recognizeNaturalNumber();
+        else if(peek() == '-') {
+            match('-');
+            recognizeExpression();
+        }
+        else if(peek() == '(') {
+            match('(');
+            recognizeExpression();
+            match(')');
+        } else {
+            recognizeIdentifier();
+        }
 
-    /**
-     * Recognize a multiplication expression, following this definition:
-     * {@code MULT_EXP ::= EXP "*" EXP}
-     *
-     * @throws ParseException When the input couldn't be parsed.
-     */
-    private void recognizeMultiplicationExpression() throws ParseException {
-
-    }
-
-    /**
-     * Recognize an addition expression, following this definition:
-     * {@code ADD_EXP ::= EXP "+" EXP}
-     *
-     * @throws ParseException When the input couldn't be parsed.
-     */
-    private void recognizeAdditionExpression() throws ParseException {
+        // Now recognize whether an additional expression is present, regardless of what we've seen so fat.
+        if(peek() == '*') {
+            match("*");
+            recognizeExpression();
+        } else if(peek() == '+') {
+            match("+");
+            recognizeExpression();
+        }
 
     }
 
