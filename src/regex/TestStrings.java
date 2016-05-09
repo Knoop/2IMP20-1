@@ -39,7 +39,7 @@ public class TestStrings {
             "01",
             "1.0",
             "-1",
-            "0.5"
+            "0.5",
     };
 
     /**
@@ -59,11 +59,11 @@ public class TestStrings {
      */
     public static final String[] floatTestsNoMatch= {
             "1.0.0",
-            "0.10000",
-            "2.0000",
+            "1",
+            "345",
             "-00.5",
-            "-1.000",
-            "0001.01"
+            "001.1",
+            "-003.2"
     };
 
     /**
