@@ -41,6 +41,12 @@ public class PicoRec {
      */
     private void recognizeProgram() throws ParseException {
 
+        match("begin");
+        recognizeDeclaration();
+        match("|");
+        recognizeStatement();
+        match("end");
+
     }
 
     /**
