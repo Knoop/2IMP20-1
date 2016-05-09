@@ -104,6 +104,14 @@ public class PicoRec {
      */
     private void recognizeNaturalNumber() throws ParseException {
 
+        if(this.peek() == '0')
+            this.match("0");
+        else{
+            this.match('1','9');
+            while(PicoRec.withinInterval(this.peek(),'0','9'))
+                this.match('0','9');
+        }
+
     }
 
     /**
