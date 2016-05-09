@@ -1,0 +1,17 @@
+ID ::= [a-z][a-z0-9]*
+NAT ::= [0]|[1-9][0-9]*
+
+DECLS ::= declare (ID,)*
+STATEMENT ::= ID:=EXP
+
+EXP ::= ID
+EXP ::= NAT
+EXP ::= EXP\+EXP
+EXP ::= EXP\*EXP
+EXP ::= -EXP
+EXP ::= (EXP)
+
+# PROGRAM is the start
+PROGRAM ::= begin DECLS | (STATEMENT;)* end
+
+
