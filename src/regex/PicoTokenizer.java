@@ -43,9 +43,9 @@ public class PicoTokenizer {
      * Obtain the next token.
      *
      * @return The next Token
-     * @throws NoSuchTokenException If there are no more tokens to read.
+     * @throws NoNextTokenException If there are no more tokens to read.
      */
-    public Token next() throws NoSuchTokenException {
+    public Token next() throws NoNextTokenException {
 
         Token token = this.tokenizeCurrent();
         this.shiftTokens();
@@ -59,7 +59,7 @@ public class PicoTokenizer {
      *
      * @return
      */
-    public Token peek() {
+    public Token peek() throws NoNextTokenException {
         return this.tokenizeCurrent();
     }
 
@@ -70,7 +70,7 @@ public class PicoTokenizer {
      */
     private Token tokenizeCurrent() {
         if (this.current == null)
-            throw new NoSuchTokenException();
+            throw new NoNextTokenException();
 
         if (this.typeOfCurrent == null)
             this.typeOfCurrent = this.determineTypeOfCurrent();
@@ -222,6 +222,15 @@ public class PicoTokenizer {
     /**
      * Exception that indicates that there are no more tokens to read.
      */
-    public static class NoSuchTokenException extends RuntimeException {
+    public static class NoNextTokenException extends RuntimeException {
+    }
+
+    /**
+     * Exception that indicates that the value that was read can not be converted to a token
+     */
+    public static class NoMatchingTokenException extends RuntimeException {
+        private NoMatchingTokenException(String value) {
+            super("There is no token that matches the value \"" + value + "\"");
+        }
     }
 }
