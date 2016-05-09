@@ -107,7 +107,11 @@ public class PicoTokenizer {
     }
 
     private Token.Type determineTypeOfCurrent() {
-        return null;
+        for (Token.Type type : Token.Type.values())
+            if (type.isKeyword ? this.current.equals(type.representation) : this.current.matches(type.representation))
+                return type;
+
+        throw new NoMatchingTokenException(this.current);
     }
 
     public static class Token {
@@ -122,7 +126,7 @@ public class PicoTokenizer {
         public final Type type;
 
         private Token(Type type) {
-            this(type, type.delimiter);
+            this(type, type.representation);
         }
 
         private Token(Type type, String value) {
@@ -157,7 +161,7 @@ public class PicoTokenizer {
          * Indicates whether this {@code Token} represents a keyword. This is determined by checking whether the {@code
          * Token.Type} of this
          * {@code Token} is a keyword. If it is a keyword, then the value attribute of this {@code Token} will be equal
-         * to the delimiter attribute of its {@code Token.Type}. Otherwise no such guarantees are given.
+         * to the representation attribute of its {@code Token.Type}. Otherwise no such guarantees are given.
          *
          * @return Whether this {@code Token} represents a keyword.
          */
@@ -166,26 +170,32 @@ public class PicoTokenizer {
         }
 
         public enum Type {
-            BEGIN("begin"), END("end"), DECLARE("declare"), DECLARATION_END(","), DECLARATIONS_END("|"), STATEMENT_END(";"), ASSIGN(":="), OPEN("("), CLOSE(")"), MINUS("-"), ADD("+"), MULTIPLY("*"), IDENTIFIER, NATNUMBER;
+            // All keywords
+            BEGIN("begin"), END("end"), DECLARE("declare"), DECLARATION_END(","), DECLARATIONS_END("|"),
+            STATEMENT_END(";"), ASSIGN(":="), OPEN("("), CLOSE(")"), MINUS("-"), ADD("+"), MULTIPLY("*"),
+            // All variables
+            IDENTIFIER("[a-z][a-z0-9]*", false), NATNUMBER("0|([1-9][0-9]*)", false);
 
-            private String delimiter;
+            private String representation;
+            private boolean isKeyword;
 
             /**
              * Keyword constructor. This allows for a keyword to be set, meaning that this type is indicated by the
              * given
              * keyword. Types without a keyword are interpreted as variables and must be paired with a value.
              *
-             * @param delimiter The delimiter, which is the string representation of the keyword.
+             * @param representation The representating string of the keyword.
              */
-            Type(String delimiter) {
-                this.delimiter = delimiter;
+            Type(String representation, boolean isKeyword) {
+                this.representation = representation;
+                this.isKeyword = isKeyword;
             }
 
             /**
              * Variable constructor. This is used to indicate a type that should be paired with a value.
              */
-            Type() {
-                this(null);
+            Type(String representation) {
+                this(representation, true);
             }
 
             /**
@@ -208,13 +218,7 @@ public class PicoTokenizer {
              * @return {@code true} if the type is one of the keywords as indicated above, {@code false} otherwise.
              */
             public boolean isKeyword() {
-                switch (this) {
-                    case IDENTIFIER:
-                    case NATNUMBER:
-                        return false;
-                    default:
-                        return true;
-                }
+                return this.isKeyword;
             }
         }
     }
