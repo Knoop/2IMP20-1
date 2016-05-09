@@ -185,6 +185,24 @@ public class PicoRec {
             match(expected.charAt(i));
     }
 
+    /**
+     * Matches the next character to be between the indicated inclusive bounds
+     * @param lower The lowest acceptable character (inclusive).
+     * @param upper The highest acceptable character (inclusive).
+     */
+    private void match(char lower, char upper){
+        try {
+            char actual = this.next();
+            if (!PicoRec.withinInterval(actual, lower, upper))
+                throw new MisMatchException(lower, upper, actual);
+        } catch (Exception e) {
+            throw new ParseException(e);
+        }
+    }
+
+    public static boolean withinInterval(char value, char lower, char upper){
+        return lower <= value && value <= upper;
+    }
 
     public static class ParseException extends RuntimeException {
 
