@@ -23,6 +23,10 @@ public class Test {
 
     public static void main(String[] args){
         testParse(new File("examples/valid1.pico"));
+        testParse(new File("examples/valid2.pico"));
+        testParse(new File("examples/valid3.pico"));
         testParse(new File("examples/invalid1.pico"));
+        testParse(new File("examples/invalid2.pico"));
+        testParse(new File("examples/invalid3.pico"));
     }
 }
