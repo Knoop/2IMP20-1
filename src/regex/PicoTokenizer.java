@@ -82,14 +82,20 @@ public class PicoTokenizer {
      * token returned by this method. The result returned by {@code peek} will not change between two calls to {@code
      * next}.
      *
-     * @return
+     * @return The token that lies one ahead of the current token.
      */
     public Token peek() throws NoNextTokenException {
         return this.tokenizeCurrent();
     }
 
     /**
-     * Tokenizes the current values.
+     * Tokenizes the current value. If the current value is already tokenized (i.e. {@code typeOfCurrent} is not null)
+     * then a new token is created using the stored type of the current value. If the value was null then the value for
+     * {@code typeOfCurrent} is determined, after which it is returned as a token.
+     * <p>
+     * <b> Note that for each call a new Token is constructed. As such it is not possible to use {@code ==} to
+     * determine
+     * equality. Use {@code equals} instead.</b>
      *
      * @return The created Token.
      */
@@ -123,6 +129,14 @@ public class PicoTokenizer {
         return this.matcher.find() ? this.matcher.group() : null;
     }
 
+    /**
+     * Determine the {@code Token.Type} of the current string token. This checks whether the current token string is
+     * equal to the representation of any of the {@code Token.Type} elements. The elements are inspected in the order
+     * they are defined in {@code Token.Type}.
+     *
+     * @return The determined {@code Token.Type}.
+     * @throws NoMatchingTokenException If no {@code Token.Type} element exists that matches the current token string.
+     */
     private Token.Type determineTypeOfCurrent() {
         for (Token.Type type : Token.Type.values())
             if (type.isKeyword ? this.current.equals(type.representation) : this.current.matches(type.representation))
@@ -131,6 +145,12 @@ public class PicoTokenizer {
         throw new NoMatchingTokenException(this.current);
     }
 
+    /**
+     * A Token is a string that is to be interpreted in a certain way. The meaning of the string is contained by the
+     * {@code type} attribute. The string that is to be interpreted is contained by {@code value}. Note that for
+     * keywords the contained value is equal to the representation of the type. For non keywords the string matches the
+     * regular expression as defined by the regex representation of its type.
+     */
     public static class Token {
 
         /**
@@ -186,13 +206,31 @@ public class PicoTokenizer {
             return this.type.isKeyword();
         }
 
+        /**
+         * Type indicating as what kind of token a Token should be interpreted. The types can represent keywords and
+         * non-keywords. For keywords, the token must be equal to the representation of the type. For non-keywords, the
+         * representation is a regular expression that matches on strings that can be interpreted as the type of token.
+         */
         public enum Type {
             // All keywords
             BEGIN("begin"), END("end"), DECLARE("declare"), DECLARATION_END(","), DECLARATIONS_END("|"),
             STATEMENT_END(";"), ASSIGN(":="), OPEN("("), CLOSE(")"), MINUS("-"), ADD("+"), MULTIPLY("*"),
-            // All variables
+            // All non-keywords
             IDENTIFIER("[a-z][a-z0-9]*", false), NATNUMBER("0|([1-9][0-9]*)", false);
 
+            /**
+             * The representation of a type. The representation should be interpreted differently based on whether the
+             * type is a keyword or not.
+             * <p>
+             * If it is a keyword, then the representation should be interpreted as is. For a string to be considered a
+             * token of this type, it must be exactly equal to the value of representation.
+             * </p>
+             * <p>
+             * If it isn't a keyword, then the representation should be interpreted as a regular expression. For a
+             * string to be considered a
+             * token of this type, it must match the regular expression that is the representation.
+             * </p>
+             */
             private String representation;
             private boolean isKeyword;
 

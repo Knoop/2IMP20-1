@@ -3,28 +3,32 @@ package regex;
 import regex.PicoTokenizer.Token;
 
 import java.io.InputStream;
+
 /**
  * Created by Maurice on 6-5-2016.
  */
 public class PicoRec {
 
+    /**
+     * The tokenizer used by this recognizer.
+     */
     private PicoTokenizer tokenizer;
 
-
-
     /**
-     * Creates a new recognizer that operates from the given InputStream.
+     * Creates a new {@code PicoRecognizer} that aims to recognize the content represented by the {@code InputStream} as
+     * a Pico program. To see whether the given string is a Pico program, call {@code recognize}.
      *
-     * @param stream
+     * @param stream The stream which content should be inspected as being a Pico program.
      */
     public PicoRec(InputStream stream) {
         this.tokenizer = new PicoTokenizer(stream);
     }
 
     /**
-     * Creates a new
+     * Creates a new {@code PicoRecognizer} that aims to recognize the given string as a Pico program. To see whether
+     * the given string is a Pico program, call {@code recognize}.
      *
-     * @param string
+     * @param string The string that contains the code that should be recognized as a Pico program.
      */
     public PicoRec(String string) {
         this.tokenizer = new PicoTokenizer(string);
@@ -47,7 +51,18 @@ public class PicoRec {
     }
 
     /**
-     * Recognize a declaration, following this definition:
+     * Recognize a single declaration, following this definition:
+     * {@code ID ","}.
+     *
+     * @throws ParseException When the input couldn't be parsed.
+     */
+    private void recognizeDeclaration() throws ParseException {
+        this.match(Token.Type.IDENTIFIER);
+        this.match(Token.Type.DECLARATION_END);
+    }
+
+    /**
+     * Recognize the declaration header, following this definition:
      * {@code DECLARATION ::= "declare" (ID ",")*}
      *
      * @throws ParseException When the input couldn't be parsed.
@@ -60,9 +75,9 @@ public class PicoRec {
     }
 
     /**
-     * Recognize a single declaration, following this definition:
-     * {@code ID ","}.
-     * @throws ParseException When the input couldn't be parsed.
+     * Recognize a single statement, following this definition:
+     * {@code STATEMENT ::= ID ":=" EXP ";" }
+     * @throws ParseException
      */
     private void recognizeDeclaration() throws ParseException {
         this.match(Token.Type.IDENTIFIER);
@@ -77,8 +92,8 @@ public class PicoRec {
     }
 
     /**
-     * Recognize a statement, following this definition:
-     * {@code STATEMENT ::= ID ":=" EXP ";"}
+     * Recognize multiple statements, following this definition:
+     * {@code STATEMENT*}
      *
      * @throws ParseException When the input couldn't be parsed.
      */
