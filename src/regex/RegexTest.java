@@ -67,12 +67,26 @@ public class RegexTest {
         printTest(regexBuilder, "CommentMatlab", TestStrings.matlabCommentTestsMatch, TestStrings.matlabCommentTestsNoMatch);
     }
 
+    /**
+     * Checks whether a given input sring matches a given regular expression
+     * @param regex A regular exprossion to test
+     * @param input The input used to test the regular expression
+     * @return true if the full input matches regex (no submatches), otherwise false
+     */
     public static boolean hasMatch(String regex, String input) {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);
         return matcher.matches();
     }
 
+    /**
+     * Prints the results obtained from testing a lexical definition from a given RegexBuilder instance against a
+     * number of input strings that should match and a number of input strings that should not match.
+     * @param regexBuilder An instance of RegexBuilder
+     * @param lexicalID The ID of the lexical definition to test
+     * @param matches An array of input strings that should match
+     * @param noMatches An array of input strings that should not match
+     */
     private static void printTest(RegexBuilder regexBuilder, String lexicalID, String[] matches, String[] noMatches) {
         String regex = regexBuilder.getUnfoldedExpression(lexicalID);
         System.out.println(String.format("Tests for the '%s' lexical definition", lexicalID));
@@ -87,12 +101,22 @@ public class RegexTest {
         System.out.println();
     }
 
+    /**
+     * Prints the results obtained from testing a number of input strings against a given regular expression
+     * @param regex
+     * @param input
+     */
     private static void printMatches(String regex, String[] input) {
         for (String s : input) {
             printMatch(regex, s);
         }
     }
 
+    /**
+     * Prints whether a given input string matches a given regular expression
+     * @param regex
+     * @param input
+     */
     private static void printMatch(String regex, String input) {
         if (hasMatch(regex, input)) {
             System.out.println(String.format("%s matches %s", input, regex));
