@@ -9,6 +9,8 @@ import dk.brics.automaton.RunAutomaton;
 import gui.RegexBuilderForm;
 
 import java.io.File;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RegexTest {
     
@@ -46,8 +48,57 @@ public class RegexTest {
         RegexBuilder regexBuilder = new RegexBuilder(new File("expressions.regex"));
         RegexBuilderForm form = new RegexBuilderForm(regexBuilder);
 
-        RegexTest exampleRegexTest = new RegexTest("[a-z][a-z0-9]*");
-        exampleRegexTest.runTest("aap_df34_d asdf sdfd", 0);
-        exampleRegexTest.runTest("a_a_pasdf sdfd", 0);
+        System.out.println("Exercise 1 tests:");
+        printTest(regexBuilder, "ID", TestStrings.idTestsMatch, TestStrings.idTestsNoMatch);
+        printTest(regexBuilder, "NAT", TestStrings.natTestsMatch, TestStrings.natTestsNoMatch);
+        printTest(regexBuilder, "FLOAT", TestStrings.floatTestsMatch, TestStrings.floatTestsNoMatch);
+
+        System.out.println("==============================");
+
+        System.out.println("Exercise 2 tests:");
+        printTest(regexBuilder, "OuterString", TestStrings.ex2TestsMatch, TestStrings.ex2TestsNoMatch);
+
+        System.out.println("==============================");
+
+        System.out.println("Exercise 3 tests:");
+        System.out.println("Java comment: ");
+        printTest(regexBuilder, "CommentJava", TestStrings.javaCommentTestsMatch, TestStrings.javaCommentTestsNoMatch);
+        System.out.println("Matlab comment: ");
+        printTest(regexBuilder, "CommentMatlab", TestStrings.matlabCommentTestsMatch, TestStrings.matlabCommentTestsNoMatch);
+    }
+
+    public static boolean hasMatch(String regex, String input) {
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+        return matcher.matches();
+    }
+
+    private static void printTest(RegexBuilder regexBuilder, String lexicalID, String[] matches, String[] noMatches) {
+        String regex = regexBuilder.getUnfoldedExpression(lexicalID);
+        System.out.println(String.format("Tests for the '%s' lexical definition", lexicalID));
+        System.out.println("These should match: ");
+        printMatches(regex, matches);
+
+        System.out.println();
+
+        System.out.println("These should not match: ");
+        printMatches(regex, noMatches);
+
+        System.out.println();
+    }
+
+    private static void printMatches(String regex, String[] input) {
+        for (String s : input) {
+            printMatch(regex, s);
+        }
+    }
+
+    private static void printMatch(String regex, String input) {
+        if (hasMatch(regex, input)) {
+            System.out.println(String.format("%s matches %s", input, regex));
+        }
+        else {
+            System.out.println(String.format("%s does not match %s", input, regex));
+        }
     }
 }
