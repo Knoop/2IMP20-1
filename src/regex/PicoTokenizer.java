@@ -139,7 +139,7 @@ public class PicoTokenizer {
      */
     private Token.Type determineTypeOfCurrent() {
         for (Token.Type type : Token.Type.values())
-            if (type.isKeyword ? this.current.equals(type.representation) : this.current.matches(type.representation))
+            if (type.represents(this.current))
                 return type;
 
         throw new NoMatchingTokenException(this.current);
@@ -274,6 +274,27 @@ public class PicoTokenizer {
              */
             public boolean isKeyword() {
                 return this.isKeyword;
+            }
+
+            /**
+             * Indicates whether the given string is represented by this {@code Token.Type}. This will account what the
+             * value of the representation attribute actually represents.
+             * <p>
+             * Following the definition of representation, if this is a keyword, then the representation is interpreted
+             * as is. For the given string to be considered a
+             * token of this type, it must be exactly equal to the value of representation.
+             * </p>
+             * <p>
+             * If this isn't a keyword, then the representation is interpreted as a regular expression. For the given
+             * string to be considered a
+             * token of this type, it must match the regular expression that is the representation.
+             * </p>
+             *
+             * @param string The string for which to check whether it is represented by this {@code Token.Type}.
+             * @return A boolean following the rules as indicated above.
+             */
+            public boolean represents(String string) {
+                return this.isKeyword ? representation.equals(string) : string.matches(representation);
             }
         }
     }
