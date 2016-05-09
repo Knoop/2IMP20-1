@@ -70,7 +70,7 @@ public class PicoRec {
     private void recognizeDeclarations() throws ParseException {
         this.match(Token.Type.DECLARE);
 
-        while(this.tokenizer.peek().type != Token.Type.DECLARATIONS_END)
+        while (this.tokenizer.peek().type != Token.Type.DECLARATIONS_END)
             this.recognizeDeclaration();
     }
 
@@ -79,11 +79,6 @@ public class PicoRec {
      * {@code STATEMENT ::= ID ":=" EXP ";" }
      * @throws ParseException
      */
-    private void recognizeDeclaration() throws ParseException {
-        this.match(Token.Type.IDENTIFIER);
-        this.match(Token.Type.DECLARATION_END);
-    }
-
     private void recognizeStatement() throws ParseException {
         this.match(Token.Type.IDENTIFIER);
         this.match(Token.Type.ASSIGN);
@@ -98,7 +93,7 @@ public class PicoRec {
      * @throws ParseException When the input couldn't be parsed.
      */
     private void recognizeStatements() throws ParseException {
-        while(this.tokenizer.peek().type != Token.Type.END)
+        while (this.tokenizer.peek().type != Token.Type.END)
             this.recognizeStatement();
     }
 
@@ -118,7 +113,7 @@ public class PicoRec {
 
         // Obtain the next token and see what type of expression the left hand is
         Token t = this.tokenizer.next();
-        switch(t.type){
+        switch (t.type) {
 
             case OPEN:
                 this.recognizeExpression();
@@ -136,7 +131,7 @@ public class PicoRec {
         }
 
         // See if there is a right hand as well (which is + or * followed by another expression)
-        switch(this.tokenizer.peek().type){
+        switch (this.tokenizer.peek().type) {
             case ADD:
                 this.match(Token.Type.ADD);
                 this.recognizeExpression();
@@ -169,12 +164,12 @@ public class PicoRec {
      * Checks whether the next character is any of the given characters
      *
      * @param expected A set of characters that are expected.
-     * characters, {@code false} otherwise.
+     *                 characters, {@code false} otherwise.
      */
     private void match(Token.Type expected) throws ParseException {
         try {
             Token actual = this.tokenizer.next();
-            if(actual.type != expected)
+            if (actual.type != expected)
                 throw new MisMatchException(expected, actual.type);
         } catch (Exception e) {
             throw new ParseException(e);
@@ -183,12 +178,11 @@ public class PicoRec {
 
     public static class ParseException extends RuntimeException {
 
-        private ParseException(Exception cause){
+        private ParseException(Exception cause) {
             super(cause);
         }
 
     }
-
 
 
     public class MisMatchException extends RuntimeException {
